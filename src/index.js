@@ -32,9 +32,50 @@ scene.add(cubeEdges);
 // 设定相机位置
 camera.position.z = 5;
 
+// 鼠标控制变量
+let mouseX = 0;
+let mouseY = 0;
+let isMoving = true; // 用于控制立方体是否跟随鼠标移动
+
+// 监听鼠标移动事件，更新鼠标位置
+document.addEventListener('mousemove', (event) => {
+  if (isMoving) { // 仅当允许移动时更新鼠标位置
+    mouseX = (event.clientX / window.innerWidth) * 2 - 1; // 将鼠标位置映射到 [-1, 1]
+    mouseY = -(event.clientY / window.innerHeight) * 2 + 1; // 将 Y 坐标映射到 [-1, 1]
+  }
+});
+
+// 监听鼠标点击事件，切换移动状态
+document.addEventListener('mousedown', (event) => {
+  if (event.button === 0) {
+    // 左键点击：开始/继续移动
+    isMoving = true;
+  } else if (event.button === 2) {
+    // 右键点击：停止移动
+    isMoving = false;
+  }
+});
+
+// 禁止右键菜单的显示
+document.addEventListener('contextmenu', (event) => event.preventDefault());
+
+// 监听鼠标滚轮事件，控制立方体大小
+document.addEventListener('wheel', (event) => {
+  const scaleAmount = 1 - event.deltaY * 0.001; // 根据滚轮方向调整缩放比例
+  cubeEdges.scale.x *= scaleAmount; // X 轴缩放
+  cubeEdges.scale.y *= scaleAmount; // Y 轴缩放
+  cubeEdges.scale.z *= scaleAmount; // Z 轴缩放
+});
+
 // 动画函数
 function animate () {
   requestAnimationFrame(animate);
+
+  // 立方体跟随鼠标移动
+  if (isMoving) { // 仅当允许移动时更新立方体位置
+    cubeEdges.position.x = mouseX * 5; // 根据鼠标 X 坐标移动立方体，乘以 5 调整范围
+    cubeEdges.position.y = mouseY * 5; // 根据鼠标 Y 坐标移动立方体
+  }
 
   // 旋转立方体
   cubeEdges.rotation.x += 0.01;
@@ -49,7 +90,7 @@ function animate () {
       }
     }
   });
-  stars.geometry.attributes.position.needsUpdate = true; // 更新星星的位置
+  stars.geometry.attributes.position.needsUpdate = true;
 
   renderer.render(scene, camera);
 }
